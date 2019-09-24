@@ -3,7 +3,7 @@
 GoBackup is a `mysqldumper` wrapper to full/partial backup and/or compress mysql databases. 
 
 ## Download
-You can download the release file from [releases](/releases) page.
+You can download the release file from [releases](https://github.com/YasnaTeam/db-backup/releases) page.
 
 ## Usage
 
