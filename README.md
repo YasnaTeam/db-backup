@@ -22,7 +22,11 @@ You can see usage with --help flag
 | db_port | database port number      |    3306 |
 | config | database config file      |     |
 
-
+example usage : 
+```bash
+gobackup -f gz -config /laravel/.env -n out  
+```
+This command will create a file named `out` and `out.gz` by dumping all tables with connection info of `.env` file
 ## Contribution :love_letter:
 
 Fork project and send PR to me :heart:
