@@ -13,7 +13,8 @@ You can see usage with --help flag
 | t     | name of table(s) you want to dump comma separated. | * |
 | n      | output file name      |   dump |
 | p | output file path      |     |
-| f     | output file type (sql|zip|gz) | sql |
+| f     | output file type (sql,zip,gz) | sql |
+| d     | add date to output file | false |
 | db_user      | database user name      |    |
 | db_pass | database user password      |     |
 | db_host     | database host |  |
