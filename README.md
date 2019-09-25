@@ -2,10 +2,10 @@
 
 GoBackup is a `mysqldumper` wrapper to full/partial backup and/or compress mysql databases. 
 
-## Download
+### Download
 You can download the release file from [releases](https://github.com/YasnaTeam/db-backup/releases) page.
 
-## Usage
+### Usage
 You can see usage with --help flag
 
 | Flag        | Usage           | Default  |
@@ -27,6 +27,13 @@ example usage :
 gobackup -f gz -config /laravel/.env -n out  
 ```
 This command will create a file named `out` and `out.gz` by dumping all tables with connection info of `.env` file
-## Contribution :love_letter:
+
+### Build Executable From Source
+You May build the executable file with following command : 
+```bash
+go build -ldflags="-s -w"
+```
+###### flags are for decreasing output size 
+### Contribution :love_letter:
 
 Fork project and send PR to me :heart:
