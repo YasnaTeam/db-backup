@@ -149,11 +149,20 @@ compress output file
 */
 func runCompressCommand() {
 	console("compressing dump file... ")
-	bashCommand = "zip " + getOutputFilePath() + ".zip " + getOutputFilePath()
-	_, err := exec.Command("sh", "-c", bashCommand).Output()
-	if err != nil {
-		console("Cannot compress file.")
-		os.Exit(0)
+	if fileType == "zip" {
+		bashCommand = "zip " + getOutputFilePath() + ".zip " + getOutputFilePath()
+		_, err := exec.Command("sh", "-c", bashCommand).Output()
+		if err != nil {
+			console("Cannot compress file.")
+			os.Exit(0)
+		}
+	} else {
+		bashCommand = "gzip -c " + getOutputFilePath() + " > " + getOutputFilePath() + ".gz"
+		_, err := exec.Command("sh", "-c", bashCommand).Output()
+		if err != nil {
+			console("Cannot compress file.")
+			os.Exit(0)
+		}
 	}
 }
 
