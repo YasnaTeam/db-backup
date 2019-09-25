@@ -21,8 +21,9 @@ var dbPassword string
 var dbDatabase string
 var dbHostname string
 var dbPortNumber string
-
+var backupDate string
 var bashCommand string
+var includeDate bool
 
 type LaravelEnvFile map[string]string
 
@@ -89,7 +90,11 @@ func getValidFileTypes() []string {
 }
 
 func getOutputFilePath() string {
-	return filePath + fileName
+	if includeDate {
+		return filePath + fileName + backupDate
+	} else {
+		return filePath + fileName
+	}
 }
 
 /**
@@ -100,6 +105,7 @@ func parseFlags() {
 	flag.StringVar(&fileName, "n", "dump", "output file name")
 	flag.StringVar(&filePath, "p", "", "output file path")
 	flag.StringVar(&fileType, "f", "sql", "output file type (sql|zip|gz)")
+	flag.BoolVar(&includeDate, "d", false, "add date to output files")
 
 	flag.StringVar(&dbUsername, "db_user", "", "database user name")
 	flag.StringVar(&dbPassword, "db_pass", "", "database user password")
@@ -139,7 +145,7 @@ func runDumpCommand() {
 
 	_, err := exec.Command("sh", "-c", bashCommand).Output()
 	if err != nil {
-		console("Eerror occured!")
+		console("Error occurred!")
 		os.Exit(0)
 	}
 }
@@ -178,12 +184,29 @@ func readEnv() {
 	dbPortNumber = config["DB_PORT"]
 }
 
-func console(message string) {
+/**
+get iso Date & time
+*/
+func isoDate(kebabcase bool) string {
 	dt := time.Now()
-	fmt.Println(dt.Format("01-02-2006 15:04:05") + " :: " + message)
+	if kebabcase {
+		var kc = strings.Replace(dt.Format("01-02-2006 15:04:05"), " ", "-", -1)
+		kc = strings.Replace(kc, ":", "-", -1)
+		return kc
+	}
+	return dt.Format("01-02-2006 15:04:05")
+
+}
+
+/**
+console output
+*/
+func console(message string) {
+	fmt.Println(isoDate(false) + " :: " + message)
 }
 
 func main() {
+	backupDate = isoDate(true)
 	parseFlags()
 	if configFile != "" {
 		readEnv()
