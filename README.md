@@ -22,7 +22,7 @@ You can see usage with --help flag
 | db_port | database port number      |    3306 |
 | config | database config file      |     |
 
-example usage : 
+Example usage : 
 ```bash
 gobackup -f gz -config /laravel/.env -n out  
 ```
