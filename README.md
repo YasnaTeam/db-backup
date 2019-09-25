@@ -33,7 +33,8 @@ You May build the executable file with following command :
 ```bash
 go build -ldflags="-s -w"
 ```
-###### flags are for decreasing output size 
+###### Flags are for decreasing output size 
+
 ### Contribution :love_letter:
 
 Fork project and send PR to me :heart:
