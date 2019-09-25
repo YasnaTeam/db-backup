@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 var tableFlag string
@@ -104,14 +105,14 @@ func parseFlags() {
 	flag.StringVar(&dbPassword, "db_pass", "", "database user password")
 	flag.StringVar(&dbHostname, "db_host", "", "database host")
 	flag.StringVar(&dbDatabase, "db_name", "", "database name")
-	flag.StringVar(&dbPortNumber, "db_port", "", "database port number")
+	flag.StringVar(&dbPortNumber, "db_port", "3306", "database port number")
 
 	flag.StringVar(&configFile, "config", "", "database config file")
 
 	flag.Parse()
 
 	if !contains(getValidFileTypes(), fileType) {
-		fmt.Println("invalid file type ", getValidFileTypes())
+		console("invalid file type ")
 
 	}
 }
@@ -138,7 +139,7 @@ func runDumpCommand() {
 
 	_, err := exec.Command("sh", "-c", bashCommand).Output()
 	if err != nil {
-		fmt.Println("Eerror occured!")
+		console("Eerror occured!")
 		os.Exit(0)
 	}
 }
@@ -147,11 +148,11 @@ func runDumpCommand() {
 compress output file
 */
 func runCompressCommand() {
-	fmt.Println("compressing dump file... ")
+	console("compressing dump file... ")
 	bashCommand = "zip " + getOutputFilePath() + ".zip " + getOutputFilePath()
 	_, err := exec.Command("sh", "-c", bashCommand).Output()
 	if err != nil {
-		fmt.Println("Cannot compress file.")
+		console("Cannot compress file.")
 		os.Exit(0)
 	}
 }
@@ -168,16 +169,20 @@ func readEnv() {
 	dbPortNumber = config["DB_PORT"]
 }
 
-func main() {
+func console(message string) {
+	dt := time.Now()
+	fmt.Println(dt.Format("01-02-2006 15:04:05") + " :: " + message)
+}
 
+func main() {
 	parseFlags()
 	if configFile != "" {
 		readEnv()
 	}
-	fmt.Println("dumping database...")
-	 runDumpCommand()
+	console("dumping database...")
+	runDumpCommand()
 	if fileType == "zip" || fileType == "gz" {
 		runCompressCommand()
 	}
-	fmt.Println("done!")
+	console("done!")
 }
