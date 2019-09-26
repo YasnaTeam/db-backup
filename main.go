@@ -78,15 +78,9 @@ func contains(s []string, e string) bool {
 	return false
 }
 
-/**
-return valid file types
-*/
+// getValidFileTypes returns an array of acceptable file extensions
 func getValidFileTypes() []string {
-	var validTypes = make([]string, 3)
-	validTypes[0] = "sql"
-	validTypes[1] = "zip"
-	validTypes[2] = "gz"
-	return validTypes
+	return []string{"sql","zip","gz"}
 }
 
 func getOutputFilePath() string {
