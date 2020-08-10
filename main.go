@@ -80,14 +80,14 @@ func contains(s []string, e string) bool {
 
 // getValidFileTypes returns an array of acceptable file extensions
 func getValidFileTypes() []string {
-	return []string{"sql","zip","gz"}
+	return []string{"sql", "zip", "gz"}
 }
 
 func getOutputFilePath() string {
 	if includeDate {
-		return filePath + fileName + backupDate
+		return filePath + fileName + backupDate + ".sql"
 	} else {
-		return filePath + fileName
+		return filePath + fileName + ".sql"
 	}
 }
 
@@ -137,11 +137,7 @@ func runDumpCommand() {
 		getTableNames() + "  > " +
 		getOutputFilePath()
 
-	_, err := exec.Command("sh", "-c", bashCommand).Output()
-	if err != nil {
-		console("Error occurred!")
-		os.Exit(0)
-	}
+	executeCommand(bashCommand, "Error occurred!")
 }
 
 /**
@@ -151,18 +147,27 @@ func runCompressCommand() {
 	console("compressing dump file... ")
 	if fileType == "zip" {
 		bashCommand = "zip " + getOutputFilePath() + ".zip " + getOutputFilePath()
-		_, err := exec.Command("sh", "-c", bashCommand).Output()
-		if err != nil {
-			console("Cannot compress file.")
-			os.Exit(0)
-		}
-	} else {
+		executeCommand(bashCommand, "Cannot compress file.")
+	} else if fileType == "gz" {
 		bashCommand = "gzip -c " + getOutputFilePath() + " > " + getOutputFilePath() + ".gz"
-		_, err := exec.Command("sh", "-c", bashCommand).Output()
-		if err != nil {
-			console("Cannot compress file.")
-			os.Exit(0)
-		}
+		executeCommand(bashCommand, "Cannot compress file.")
+	}
+
+	// remove .sql file
+	if fileType != "sql" {
+		bashCommand = "rm -f " + getOutputFilePath()
+		executeCommand(bashCommand, "Cannot Delete .sql file")
+	}
+}
+
+/**
+Execute the command and console the error if it has
+*/
+func executeCommand(bashCommand string, message string) {
+	_, err := exec.Command("sh", "-c", bashCommand).Output()
+	if err != nil {
+		console(message)
+		os.Exit(0)
 	}
 }
 
