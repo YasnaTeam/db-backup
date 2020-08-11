@@ -83,12 +83,22 @@ func getValidFileTypes() []string {
 	return []string{"sql", "zip", "gz"}
 }
 
+/**
+get the output file path
+*/
 func getOutputFilePath() string {
 	if includeDate {
-		return filePath + fileName + backupDate + ".sql"
+		return filePath + fileName + backupDate
 	} else {
-		return filePath + fileName + ".sql"
+		return filePath + fileName
 	}
+}
+
+/**
+get the sql output file path
+*/
+func getSqlOutput() string {
+	return getOutputFilePath() + ".sql"
 }
 
 /**
@@ -135,7 +145,7 @@ func runDumpCommand() {
 		" -p" + dbPassword + " " +
 		dbDatabase + " " +
 		getTableNames() + "  > " +
-		getOutputFilePath()
+		getSqlOutput()
 
 	executeCommand(bashCommand, "Error occurred!")
 }
@@ -146,16 +156,16 @@ compress output file
 func runCompressCommand() {
 	console("compressing dump file... ")
 	if fileType == "zip" {
-		bashCommand = "zip " + getOutputFilePath() + ".zip " + getOutputFilePath()
+		bashCommand = "zip " + getOutputFilePath() + ".zip " + getSqlOutput()
 		executeCommand(bashCommand, "Cannot compress file.")
 	} else if fileType == "gz" {
-		bashCommand = "gzip -c " + getOutputFilePath() + " > " + getOutputFilePath() + ".gz"
+		bashCommand = "gzip -c " + getSqlOutput() + " > " + getOutputFilePath() + ".gz"
 		executeCommand(bashCommand, "Cannot compress file.")
 	}
 
 	// remove .sql file
 	if fileType != "sql" {
-		bashCommand = "rm -f " + getOutputFilePath()
+		bashCommand = "rm -f " + getSqlOutput()
 		executeCommand(bashCommand, "Cannot Delete .sql file")
 	}
 }
