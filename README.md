@@ -15,6 +15,7 @@ You can see usage with --help flag
 | p | output file path      |     |
 | f     | output file type (sql,zip,gz) | sql |
 | d     | add date to output file | false |
+| i     | input file path |  |
 | db_user      | database user name      |    |
 | db_pass | database user password      |     |
 | db_host     | database host |  |
@@ -27,6 +28,12 @@ Example usage :
 gobackup -f gz -config /laravel/.env -n out  
 ```
 This command will create a file named `out` and `out.gz` by dumping all tables with connection info of `.env` file
+
+### Import Command
+You can also import a sql file with any of these mime-types (`sql`,`gz`,`zip`):
+```bash
+gobackup -i path/to/file.sql -config /laravel/.env
+```
 
 ### Build Executable From Source
 You May build the executable file with following command : 

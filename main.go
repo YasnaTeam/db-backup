@@ -112,7 +112,7 @@ func parseFlags() {
 	flag.StringVar(&filePath, "p", "", "output file path")
 	flag.StringVar(&fileType, "f", "sql", "output file type (sql|zip|gz)")
 	flag.BoolVar(&includeDate, "d", false, "add date to output files")
-	flag.StringVar(&importFile, "i", "", "import file path")
+	flag.StringVar(&importFile, "i", "", "input file path")
 
 	flag.StringVar(&dbUsername, "db_user", "", "database user name")
 	flag.StringVar(&dbPassword, "db_pass", "", "database user password")
