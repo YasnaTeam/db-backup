@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"strings"
@@ -23,6 +24,7 @@ var dbHostname string
 var dbPortNumber string
 var backupDate string
 var bashCommand string
+var importFile string
 var includeDate bool
 
 type LaravelEnvFile map[string]string
@@ -110,6 +112,7 @@ func parseFlags() {
 	flag.StringVar(&filePath, "p", "", "output file path")
 	flag.StringVar(&fileType, "f", "sql", "output file type (sql|zip|gz)")
 	flag.BoolVar(&includeDate, "d", false, "add date to output files")
+	flag.StringVar(&importFile, "i", "", "import file path")
 
 	flag.StringVar(&dbUsername, "db_user", "", "database user name")
 	flag.StringVar(&dbPassword, "db_pass", "", "database user password")
@@ -123,7 +126,6 @@ func parseFlags() {
 
 	if !contains(getValidFileTypes(), fileType) {
 		console("invalid file type ")
-
 	}
 }
 
@@ -138,6 +140,8 @@ func getTableNames() string {
 create bash command and store it
 */
 func runDumpCommand() {
+	console("dumping database...")
+
 	bashCommand = "mysqldump -h" +
 		dbHostname +
 		" -P" + dbPortNumber +
@@ -147,7 +151,70 @@ func runDumpCommand() {
 		getTableNames() + "  > " +
 		getSqlOutput()
 
-	executeCommand(bashCommand, "Error occurred!")
+	_, err := exec.Command("sh", "-c", bashCommand).Output()
+	if err != nil {
+		console("Error! Export Failed!")
+		removeMainFile()
+		os.Exit(0)
+	}
+}
+
+/**
+create bash command and store it
+*/
+func runImportCommand() {
+	console("importing database...")
+	extractImportFile()
+	bashCommand = "mysql -h" +
+		dbHostname +
+		" -P" + dbPortNumber +
+		" -u " + dbUsername +
+		" -p" + dbPassword + " " +
+		dbDatabase + " < " +
+		importFile
+
+	executeCommand(bashCommand, "Import Failed!")
+
+	// remove the tmp file if exists
+	os.Remove("tmp.sql")
+}
+
+/**
+extract the import file if it is gz or zip
+*/
+func extractImportFile() {
+	contentType := getFileContentType()
+	if contentType == "application/x-gzip" || contentType == "application/zip" {
+		bashCommand = "gunzip -c " + importFile + " > tmp.sql"
+		executeCommand(bashCommand, "Cannot decompress the file")
+		importFile = "tmp.sql"
+	}
+}
+
+/**
+get importFile content type
+*/
+func getFileContentType() string {
+	f, err := os.Open(importFile)
+	if err != nil {
+		console("Error! " + importFile + " not found!")
+		os.Exit(0)
+	}
+	defer f.Close()
+	// Only the first 512 bytes are used to sniff the content type.
+	buffer := make([]byte, 512)
+
+	_, err = f.Read(buffer)
+	if err != nil {
+		console("Error! Cannot read " + importFile)
+		os.Exit(0)
+	}
+
+	// Use the net/http package's handy DectectContentType function. Always returns a valid
+	// content-type by returning "application/octet-stream" if no others seemed to match.
+	contentType := http.DetectContentType(buffer)
+
+	return contentType
 }
 
 /**
@@ -165,8 +232,18 @@ func runCompressCommand() {
 
 	// remove .sql file
 	if fileType != "sql" {
-		bashCommand = "rm -f " + getSqlOutput()
-		executeCommand(bashCommand, "Cannot Delete .sql file")
+		removeMainFile()
+	}
+}
+
+/**
+remove main file
+*/
+func removeMainFile() {
+	err := os.Remove(getSqlOutput())
+	if err != nil {
+		console("Error! Cannot Delete .sql file")
+		os.Exit(0)
 	}
 }
 
@@ -176,7 +253,7 @@ Execute the command and console the error if it has
 func executeCommand(bashCommand string, message string) {
 	_, err := exec.Command("sh", "-c", bashCommand).Output()
 	if err != nil {
-		console(message)
+		console("Error! " + message)
 		os.Exit(0)
 	}
 }
@@ -220,10 +297,15 @@ func main() {
 	if configFile != "" {
 		readEnv()
 	}
-	console("dumping database...")
-	runDumpCommand()
-	if fileType == "zip" || fileType == "gz" {
-		runCompressCommand()
+
+	if importFile != "" {
+		runImportCommand()
+	} else {
+		runDumpCommand()
+		if fileType == "zip" || fileType == "gz" {
+			runCompressCommand()
+		}
 	}
+
 	console("done!")
 }
